@@ -1,5 +1,3 @@
-# Trinity-CPSC275-Introduction-to-Computer-Systems
- 
 <div align="center" id="top"> 
   <img src="./.github/app.gif" alt="Trinity CPSC275 Introduction to Computer Systems" />
 
