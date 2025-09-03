@@ -67,7 +67,7 @@ $ cd Trinity-CPSC275-Introduction-to-Computer-Systems
 
 ## :memo: License ##
 
-This project is under license from MIT. For more details, see the [LICENSE](LICENSE.md) file.
+This project is under license from MIT. For more details, see the [LICENSE](LICENSE) file.
 
 
 Made by <a href="https://github.com/sbalbale" target="_blank">Sean Balbale</a>
