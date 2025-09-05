@@ -16,14 +16,12 @@ int main() {
         printf("0\n");
         return 0;
     }
-
     // Reverse the number
     temp = num;
     while (temp > 0) {
         reverse = reverse * 10 + (temp % 10);
         temp /= 10;
     }
-    
     // Print each digit of the reversed number with an asterisk
     while (reverse > 0) {
         digit = reverse % 10;
@@ -34,6 +32,4 @@ int main() {
         }
     }
     printf("\n");
-    
-    return 0;
 }
