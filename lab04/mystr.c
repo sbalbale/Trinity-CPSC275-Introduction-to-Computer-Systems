@@ -1,13 +1,39 @@
 #include <stdio.h>
 
 int mystrlen(char *s){
-	printf("length: %s", s);
-	return (void*)&s;
+	int len = 0;
+	while(*s != '\0'){
+		len++;
+		*s++;
+	}
+	return len;
 }
 
-char *mystrcpy(){
+char *mystrcpy(char *dest, char *src){
+	char *destStart = dest;
+	while(*src != '\0'){
+		*dest = *src;
+		src++;
+		dest++;
+	}
 	
+	return destStart;
 }
+
+char *mystrcat(char *dest, char *src){
+	char *destStart = dest;
+	while(*dest != '\0'){
+		dest++;
+	}
+	while(*src != '\0'){
+		*dest = *src;
+		src++;
+		dest++;
+	}
+
+	return destStart;
+}
+
 
 void main()
 {
