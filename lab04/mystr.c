@@ -1,5 +1,14 @@
 #include <stdio.h>
 
+int mystrlen(char *s){
+	printf("length: %s", s);
+	return (void*)&s;
+}
+
+char *mystrcpy(){
+	
+}
+
 void main()
 {
    char *s1 = "Hello ";

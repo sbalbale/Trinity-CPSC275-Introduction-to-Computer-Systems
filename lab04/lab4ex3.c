@@ -14,4 +14,13 @@ void main( )
 
    /* Note: Do not try to print *cp here, because it points to the
       memory location unallocated to your program */
+
+   int i = 0;
+   int *ip = &i;
+
+   printf("ip is: %p\n", ip);
+   printf("The character at ip is %i\n", *ip);
+
+   ip = ip + 1;
+   printf("ip is now %p\n", ip);
 }
