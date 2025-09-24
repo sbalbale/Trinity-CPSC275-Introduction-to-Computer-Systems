@@ -16,7 +16,7 @@ char *mystrcpy(char *dest, char *src){
 		src++;
 		dest++;
 	}
-	
+	*dest = '\0';
 	return destStart;
 }
 
@@ -30,7 +30,7 @@ char *mystrcat(char *dest, char *src){
 		src++;
 		dest++;
 	}
-
+	*dest = '\0';
 	return destStart;
 }
 
