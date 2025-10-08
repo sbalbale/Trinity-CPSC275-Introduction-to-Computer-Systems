@@ -14,24 +14,30 @@
 # Byte 1 of 0x12345678 is 0x56.
 
 .LCO:
-	.string	"Byte %d of %u is %u\n"
+	.string	"Byte %d of 0x%x is 0x%x\n"
 
   .globl  main
 main:
   pushl %ebp # save frame pointer
   movl %esp,%ebp # adjust stack pointer
   
-  movl $0x12345678, %eax # load x into eax
-  movl $1, %ebx # load n into ebx 
-  pushl %ebx
-  pushl %eax
-  
-  sarl %ebx, %eax # shift right eax by n
-  andl $0xFF, %eax # mask to get the least significant byte
 
-  pushl %eax
-  pushl .LCO
+  movl $0x12345678, %eax # load x into eax
+  movl %eax, %edx         # save x in edx for later
+  movl $1, %ebx           # load n into ebx
+  movl %ebx, %esi         # save n in esi for later
+  imull $8, %ebx, %ebx    # multiply n by 8 to get bit shift amount (n * 8)
+
+  movb %bl, %cl           # move n (lower 8 bits of ebx) to cl
+  shrl %cl, %eax          # shift right eax by n
+  andl $0xFF, %eax        # mask to get the least significant byte
+
+  pushl %eax              # push extracted byte
+  pushl %edx              # push x
+  pushl %esi              # push n
+  pushl $.LCO             # push address of format string
   call printf
+  
 
   leave # restore the current activation
   ret # return to caller
