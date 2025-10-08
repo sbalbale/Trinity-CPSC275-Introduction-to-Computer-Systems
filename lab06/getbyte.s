@@ -26,8 +26,9 @@ main:
   movl %eax, %edx         # save x in edx for later
   movl $1, %ebx           # load n into ebx
   movl %ebx, %esi         # save n in esi for later
-  imull $8, %ebx, %ebx    # multiply n by 8 to get bit shift amount (n * 8)
+ # imull $8, %ebx, %ebx    # multiply n by 8 to get bit shift amount (n * 8)
 
+  sall $3, %ebx           # shift mult by 8
   movb %bl, %cl           # move n (lower 8 bits of ebx) to cl
   shrl %cl, %eax          # shift right eax by n
   andl $0xFF, %eax        # mask to get the least significant byte
