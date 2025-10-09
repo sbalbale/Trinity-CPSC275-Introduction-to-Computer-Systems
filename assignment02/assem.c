@@ -28,22 +28,26 @@ unsigned short binstr2num(char *binStr)
     return result;
 }
 
+// Decode the instruction into opcode and operand
+// Return m (0 for memory address, 1 for constant)
 unsigned short decode(unsigned short inStr, unsigned short *opCode, unsigned short *opn)
 {
     // Extract the opcode (bits 0-3)
     *opCode = (inStr >> 12) & 0xF;
-    //  exxtract m (bit 4)
+
+    // extract m (bit 4)
     unsigned short m = (inStr >> 11) & 0x1;
 
     // if m is 0, the operand is a memory address
     if (m == 0)
     {
+        // extract the operand
         *opn = inStr & 0x7FF; // bits 5-15
     }
     // if m is 1, the operand is an constant
     else
     {
-
+        // extract the operand
         *opn = inStr & 0x7FF; // bits 5-15
     }
 
@@ -52,6 +56,7 @@ unsigned short decode(unsigned short inStr, unsigned short *opCode, unsigned sho
 
 int main()
 {
+    // array of mnemonics for opcodes 0-15
     char mnemonic[16][10] = {
         "EOC  ",
         "LOAD ",
