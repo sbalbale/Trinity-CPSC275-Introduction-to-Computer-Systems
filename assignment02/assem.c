@@ -1,7 +1,10 @@
 /**
- * Assem.c
- * Sean Balbale
- * CPSC 275
+ * Program: assem.c
+ * Purpose: A simple assembler that reads 16-bit binary instructions from standard input,
+ *         decodes them into opcodes and operands, and prints the results in a human-readable format.
+ * Author: Sean Balbale
+ * Course: CPSC 275
+ * Date: 10/10/2025
  */
 
 #include <stdio.h>
@@ -9,7 +12,12 @@
 unsigned short binstr2num(char *binStr);
 unsigned short decode(unsigned short instr, unsigned short *opcode, unsigned short *opn);
 
-// Turn 15 bit binary string into an unsigned short
+/**
+ * Function: binstr2num
+ * Purpose: To convert a binary string to an unsigned short integer.
+ * Parameters: char *binStr - A string representing a binary number (16 bits).
+ * Returns: unsigned short result - The converted unsigned short integer.
+ */
 unsigned short binstr2num(char *binStr)
 {
     unsigned short result = 0;
@@ -28,8 +36,15 @@ unsigned short binstr2num(char *binStr)
     return result;
 }
 
-// Decode the instruction into opcode and operand
-// Return m (0 for memory address, 1 for constant)
+/**
+ * Function: decode
+ * Purpose: To decode a 16-bit instruction into its opcode and operand.
+ * Parameters:
+ *   unsigned short inStr - The 16-bit instruction to decode.
+ *   unsigned short *opCode - Pointer to store the extracted opcode (bits 0-3).
+ *   unsigned short *opn - Pointer to store the extracted operand (bits 5-15).
+ * Returns: unsigned short m - The addressing mode (bit 4).
+ */
 unsigned short decode(unsigned short inStr, unsigned short *opCode, unsigned short *opn)
 {
     // Extract the opcode (bits 0-3)
@@ -54,6 +69,11 @@ unsigned short decode(unsigned short inStr, unsigned short *opCode, unsigned sho
     return m;
 }
 
+/**
+ * Function: main
+ * Purpose: To read binary instructions from standard input, decode them, and print the results.
+ * Returns: int - Exit status of the program.
+ */
 int main()
 {
     // array of mnemonics for opcodes 0-15
