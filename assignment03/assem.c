@@ -126,7 +126,7 @@ void execute(unsigned short memory[], short *accumulator, unsigned short *pc, un
         else // indirect addressing
             store(memory, load(memory, *operand), *accumulator);
         break;
-    case 3:
+    case 3: // READ
     {
         // Read a value into memory
         unsigned short input;
