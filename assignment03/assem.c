@@ -19,9 +19,43 @@ unsigned short load(unsigned short memory[], unsigned short address);
 // helper functions
 unsigned short binstr2num(char *binStr);
 void loadInstructions(unsigned short memory[]);
-void printInstructions(unsigned short memory[]);
-void printData(unsigned short memory[]);
 void dump(unsigned short memory[], short accumulator, unsigned short pc, unsigned short instructionRegister, unsigned short opCode, unsigned short operand);
+
+/**
+ * Function: main
+ * Purpose: To read binary instructions from standard input, decode them, and print the results.
+ * Returns: int - Exit status of the program.
+ */
+int main()
+{
+    unsigned short opCode, opn;
+    short accumulator = 0;                  // Initialize accumulator to 0
+    unsigned short pc = 0;                  // Initialize program counter to 0
+    unsigned short instructionRegister = 0; // Initialize instruction register to 0
+    unsigned short memory[2048] = {0};      // Initialize memory to 0
+
+    loadInstructions(memory);
+
+    // Reopen stdin to read user input from the terminal
+    #ifdef _WIN32
+        freopen("CON", "r", stdin);  // Windows
+    #else
+        freopen("/dev/tty", "r", stdin);  // Linux, Mac, WSL
+    #endif
+
+    while (1)
+    {
+        execute(memory, &accumulator, &pc, &instructionRegister, &opCode, &opn);
+        if (opCode == 0 || opCode == 15) // EOC or HALT
+            break;
+       
+    }
+    
+    printf("\n\nRegisters and Memory Dump:\n");
+    dump(memory, accumulator, pc, instructionRegister, opCode, opn);
+
+    return 0;
+}
 
 /**
  * Function: binstr2num
@@ -269,7 +303,6 @@ unsigned short load(unsigned short memory[], unsigned short address)
 void loadInstructions(unsigned short memory[])
 {
     unsigned short opCode, opn;
-    unsigned short m;
     unsigned short address = 0; // Initialize memory address to 0
     char c;
 
@@ -297,7 +330,7 @@ void loadInstructions(unsigned short memory[])
         {
             // convert binary string to number and decode it
             unsigned short num = binstr2num(line); // binary string to unsigned short
-            m = decode(num, &opCode, &opn);        // decode the instruction
+            decode(num, &opCode, &opn);        // decode the instruction
 
             // Store the instruction as two bytes (high byte, then low byte)
             memory[address] = (num >> 8) & 0xFF;     // High byte
@@ -309,76 +342,6 @@ void loadInstructions(unsigned short memory[])
         if (c == '\n')
         {
             c = getchar();
-        }
-    }
-}
-
-/**
- * Function: printInstructions
- * Purpose: Print the contents of memory from address 0000 to 1023 in binary format.
- *          Should also print the address in hex, the mnemonic, and the operand.
- * Parameters: unsigned short memory[] - The memory array containing instructions.
- * Returns: void
- */
-void printInstructions(unsigned short memory[])
-{
-    // array of mnemonics for opcodes 0-15
-    char mnemonic[16][10] = {
-        "EOC  ",
-        "LOAD ",
-        "STORE",
-        "READ ",
-        "WRITE",
-        "ADD  ",
-        "SUB  ",
-        "MUL  ",
-        "DIV  ",
-        "MOD  ",
-        "NEG  ",
-        "NOP  ",
-        "JUMP ",
-        "JNEG ",
-        "JZERO",
-        "HALT "};
-    unsigned short opCode, opn;
-    unsigned short m;
-
-    for (unsigned short address = 0; address < 1024; address++)
-    {
-        unsigned short instruction = memory[address];
-        if (instruction == 0)
-            continue; // Skip empty memory locations
-
-        m = decode(instruction, &opCode, &opn); // decode the instruction
-
-        // print the address in hex, the instruction in binary, the mnemonic, and the operand
-        printf("%04X ", address);
-
-        // Print the instruction in binary format
-        for (int i = 15; i >= 0; i--)
-        {
-            putchar((instruction & (1 << i)) ? '1' : '0');
-        }
-
-        printf(" %s %04u\n", mnemonic[opCode], opn);
-    }
-}
-
-/**
- * Function: printData
- * Purpose: Print a dump of the data section (memory addresses 1024-2047).
- *          Should print the address in hex and data values in decimal format.
- * Parameters: unsigned short memory[] - The memory array containing data.
- * Returns: void
- */
-void printData(unsigned short memory[])
-{
-    printf("Address (Dec)  Value (Hex)  Value (Dec)\n");
-    for (unsigned short address = 1024; address < 2048; address++)
-    {
-        if (memory[address] != 0) // Only print non-zero values
-        {
-            printf("%04d           0x%04X       %05u\n", address, memory[address], memory[address]);
         }
     }
 }
@@ -401,92 +364,38 @@ void dump(unsigned short memory[], short accumulator, unsigned short pc,
 {
     // Print registers
     printf("\nREGISTERS:\n");
-    printf("accumulator                 0x%04X\n", accumulator);
+    printf("accumulator                 0x%04X\n", (unsigned short) accumulator);
     printf("instructionCounter          0x%04X\n", pc);
     printf("instructionRegister         0x%04X\n", instructionRegister);
     printf("opCode                      0x%X\n", opCode);
     printf("operand                     0x%04X\n", operand);
 
-    // Print CODE section (addresses 0-1023)
+    // Print CODE section (first 100 bytes, addresses 0-99)
     printf("\nCODE:\n");
     printf("     0  1  2  3  4  5  6  7  8  9\n");
-    for (unsigned short address = 0; address < 1024; address += 10)
+    for (unsigned short address = 0; address < 100; address += 10)
     {
         printf("%04d ", address);
         for (int i = 0; i < 10; i++)
         {
-            if (address + i < 1024) // Don't exceed address 1023
+            if (address + i < 100) // Don't exceed byte 99
                 printf("%02X ", memory[address + i] & 0xFF);
         }
         printf("\n");
     }
 
-    // Print DATA section (addresses 1024-2047)
-    printf("\nDATA:\n");
+    // Print DATA section (first 100 bytes, addresses 1024-1123)
+    printf("...\n\nDATA:\n");
     printf("     0  1  2  3  4  5  6  7  8  9\n");
-    for (unsigned short address = 1024; address < 2048; address += 10)
+    for (unsigned short address = 1024; address < 1124; address += 10)
     {
         printf("%04d ", address);
         for (int i = 0; i < 10; i++)
         {
-            if (address + i < 2048) // Don't exceed address 2047
+            if (address + i < 1124) // Don't exceed address 1123
                 printf("%02X ", memory[address + i] & 0xFF);
         }
         printf("\n");
     }
-}
-
-/**
- * Function: main
- * Purpose: To read binary instructions from standard input, decode them, and print the results.
- * Returns: int - Exit status of the program.
- */
-int main()
-{
-    // array of mnemonics for opcodes 0-15
-    char mnemonic[16][10] = {
-        "EOC  ",
-        "LOAD ",
-        "STORE",
-        "READ ",
-        "WRITE",
-        "ADD  ",
-        "SUB  ",
-        "MUL  ",
-        "DIV  ",
-        "MOD  ",
-        "NEG  ",
-        "NOP  ",
-        "JUMP ",
-        "JNEG ",
-        "JZERO",
-        "HALT "};
-    unsigned short opCode, opn;
-    unsigned short m;
-    short accumulator = 0;                  // Initialize accumulator to 0
-    unsigned short pc = 0;                  // Initialize program counter to 0
-    unsigned short instructionRegister = 0; // Initialize instruction register to 0
-    unsigned short memory[2048] = {0};      // Initialize memory to 0
-
-    loadInstructions(memory);
-
-    // Reopen stdin to read user input from the terminal
-    #ifdef _WIN32
-        freopen("CON", "r", stdin);  // Windows
-    #else
-        freopen("/dev/tty", "r", stdin);  // Linux, Mac, WSL
-    #endif
-
-    while (1)
-    {
-        execute(memory, &accumulator, &pc, &instructionRegister, &opCode, &opn);
-        if (opCode == 0 || opCode == 15) // EOC or HALT
-            break;
-       
-    }
-    
-    printf("\n\nRegisters and Memory Dump:\n");
-    dump(memory, accumulator, pc, instructionRegister, opCode, opn);
-
-    return 0;
+    printf("...\n");
 }
