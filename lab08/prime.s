@@ -32,16 +32,17 @@ main:
   addl  $8, %esp           # clean up stack (2 arguments = 8 bytes)
  
   movl  -4(%ebp), %eax     # load input integer into eax
-  
+
+isPrime:
   # handle special cases
   cmpl  $2, %eax           # compare input with 2
-  jl    notPrime           # if input < 2, it is not prime
-  je    isPrime            # if input == 2, it is prime
+  jl    isPrimeFalse           # if input < 2, it is not prime
+  je    isPrimeTrue            # if input == 2, it is prime
   
   # check if even
   movl  %eax, %ebx         # save number in ebx
   andl  $1, %eax           # check if odd (eax & 1)
-  jz    notPrime           # if even (and not 2), not prime
+  jz    isPrimeFalse           # if even (and not 2), not prime
   
   movl  %ebx, %eax         # restore number to eax
   movl  $3, %ebx           # divisor starts at 3
@@ -51,7 +52,7 @@ checkLoop:
   movl  %ebx, %ecx         # copy divisor to ecx
   imull %ecx, %ecx         # square the divisor
   cmpl  %ecx, %eax         # compare number with divisor^2
-  jl    isPrime            # if number < divisor^2, it's prime
+  jl    isPrimeTrue            # if number < divisor^2, it's prime
   
   # save number before division
   pushl %eax               # save number on stack
@@ -63,12 +64,12 @@ checkLoop:
   # check remainder
   cmpl  $0, %edx           # check if remainder is 0
   popl  %eax               # restore number from stack
-  je    notPrime           # if remainder is 0, not prime
+  je    isPrimeFalse           # if remainder is 0, not prime
   
   addl  $2, %ebx           # increment divisor by 2 (only check odd divisors)
   jmp   checkLoop          # continue loop
 
-isPrime:
+isPrimeTrue:
   movl  -4(%ebp), %eax     # reload original number
   pushl %eax               # push number
   pushl $.LC2              # push format string
@@ -76,7 +77,7 @@ isPrime:
   addl  $8, %esp           # clean up stack
   jmp   .done
 
-notPrime:
+isPrimeFalse:
   movl  -4(%ebp), %eax     # reload original number
   pushl %eax               # push number
   pushl $.LC3              # push format string
