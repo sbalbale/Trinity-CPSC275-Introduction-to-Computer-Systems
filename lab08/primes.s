@@ -5,7 +5,7 @@
 
 
 .LC0:
-  .string "Enter a positive integer N: "
+  .string "Enter a positive integer: "
 .LC1:
   .string "%d"
 .LC2:
