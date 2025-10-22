@@ -43,14 +43,13 @@ main:
 checkPrime:
   movl  -4(%ebp), %eax     # load input integer into eax
   cltd                     # sign-extend eax to edx:eax for division
-  div $2                  # divide eax by 2
+  divl $2                  # divide eax by 2
   jz  not_prime            # if input is even, it's not prime
   pushl -4(%ebp)         # push input integer
   pushl $.LC2             # push prime format string
   call printf             # print prime message
   addl $8, %esp           # clean up stack
   ret
-  call .done
 
 
 not_prime:
