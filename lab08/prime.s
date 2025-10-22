@@ -8,13 +8,13 @@
   # Author: Sean Balbale
   # Date: 10/22/2025
 
-.LC0
+.LC0:
   .string "Enter a positive integer: "
-.LC1
+.LC1:
   .string "%d"
-.LC2
+.LC2:
   .string "%d is a prime number.\n"
-.LC3
+.LC3:
   .string "%d is not a prime number.\n"
 
 .global main
@@ -43,9 +43,9 @@ main:
 checkPrime:
   movl  -4(%ebp), %eax     # load input integer into eax
   cltd                     # sign-extend eax to edx:eax for division
-  divl $2                  # divide eax by 2
+  div $2                  # divide eax by 2
   jz  not_prime            # if input is even, it's not prime
-  pushl -4(%edp)         # push input integer
+  pushl -4(%ebp)         # push input integer
   pushl $.LC2             # push prime format string
   call printf             # print prime message
   addl $8, %esp           # clean up stack
