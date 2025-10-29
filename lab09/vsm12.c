@@ -44,6 +44,8 @@ int main()
 
     loadInstructions(cMem, dMem);
 
+dump(cMem, dMem, accumulator, pc, instructionRegister, opCode, opn);
+
     while (1)
     {
         execute(cMem, dMem, &accumulator, &pc, &instructionRegister, &opCode, &opn, &dataPointer);
@@ -79,7 +81,6 @@ unsigned short binstr2num(char *binStr)
             result = result | 1;
         }
     }
-    printf("result: %d \n",result);
     return result;
 }
 
@@ -97,7 +98,7 @@ void decode(unsigned short inStr, unsigned short *opCode, unsigned short *opn)
     *opCode = (inStr >> 9) & 0xF;
 
     // extract the operand (bits 7-15)
-    *opn = inStr & 0x7FF;
+    *opn = inStr & 0x1FF;
 
 }
 
@@ -135,7 +136,8 @@ void execute(unsigned short cMem[], unsigned short dMem[], short *accumulator, u
     // Fetch the instruction at the current pc
     *instructionRegister = fetch(cMem, *pc);
 
-    printf("%d\n",*opCode);
+    decode(*instructionRegister, opCode, operand);
+
     // Execute based on opcode
     switch (*opCode)
     {
@@ -164,15 +166,16 @@ void execute(unsigned short cMem[], unsigned short dMem[], short *accumulator, u
     case 6: // READ
     {
         // Read a value from the dMem
-        unsigned short input = dMem[*dataPointer];
-        dataPointer += 2; // Move to next data value 
+        unsigned short input = load(dMem, *dataPointer);
+     printf("READ: operand: %d input: %d datapointer: %d \n", *operand, input, *dataPointer);
+     	dataPointer += 2; // Move to next data value 
         store(dMem, *operand, input);
         *pc += 2;
         break;
     }
     case 7: // WRITE
     {
-        printf("%hu\n", load(dMem, *operand));
+        printf("Output: %hu\n", load(dMem, *operand));
         *pc += 2;
         break;
     }
