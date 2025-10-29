@@ -17,13 +17,13 @@
 // instruction cycle functions
 void decode(unsigned short instr, unsigned short *opcode, unsigned short *opn);
 unsigned short fetch(unsigned short memory[], unsigned short pc);
-void execute(unsigned short cMem[], unsigned short dMem[], short *accumulator, unsigned short *pc, unsigned short *instructionRegister, unsigned short *opCode, unsigned short *operand, unsigned short *dataPointer);
+void execute(unsigned short cMem[], unsigned short dMem[], unsigned short inputs[], short *accumulator, unsigned short *pc, unsigned short *instructionRegister, unsigned short *opCode, unsigned short *operand, unsigned short *dataPointer);
 void store(unsigned short memory[], unsigned short address, unsigned short value);
 unsigned short load(unsigned short memory[], unsigned short address);
 
 // helper functions
 unsigned short binstr2num(char *binStr);
-void loadInstructions(unsigned short memory[], unsigned short dMem[]);
+void loadInstructions(unsigned short memory[], unsigned short inputs[]);
 void dump(unsigned short cMem[], unsigned short dMem[], short accumulator, unsigned short pc, unsigned short instructionRegister, unsigned short opCode, unsigned short operand);
 
 /**
@@ -40,15 +40,15 @@ int main()
     unsigned short cMem[512] = {0};      // Initialize code memory to 0
     unsigned short dMem[64] = {0};      // Initialize data memory to 0
     unsigned short dataPointer = 0;      // Pointer to current data location in dMem
+	unsigned short inputs[64];
 
-
-    loadInstructions(cMem, dMem);
+    loadInstructions(cMem, inputs);
 
 dump(cMem, dMem, accumulator, pc, instructionRegister, opCode, opn);
 
     while (1)
     {
-        execute(cMem, dMem, &accumulator, &pc, &instructionRegister, &opCode, &opn, &dataPointer);
+        execute(cMem, dMem, inputs, &accumulator, &pc, &instructionRegister, &opCode, &opn, &dataPointer);
         if (opCode == 0) // HALT
             break;
 
@@ -131,51 +131,50 @@ unsigned short fetch(unsigned short memory[], unsigned short pc)
  *          unsigned short *dataPointer - Pointer to the current data location for READ operations.
  * Returns: void
  */
-void execute(unsigned short cMem[], unsigned short dMem[], short *accumulator, unsigned short *pc, unsigned short *instructionRegister, unsigned short *opCode, unsigned short *operand, unsigned short *dataPointer)
+void execute(unsigned short cMem[], unsigned short dMem[], unsigned short inputs[], short *accumulator, unsigned short *pc, unsigned short *instructionRegister, unsigned short *opCode, unsigned short *operand, unsigned short *dataPointer)
 {
     // Fetch the instruction at the current pc
     *instructionRegister = fetch(cMem, *pc);
 
     decode(*instructionRegister, opCode, operand);
-
     // Execute based on opcode
     switch (*opCode)
     {
     case 0: // HALT
         break;
     case 1: // LOAD
-        *accumulator = load(cMem, *operand);
-        *pc += 2;
+        *accumulator = *operand; // Use the operand value directly
+	*pc += 2;
         break;
     case 2: // ADD
-    	*accumulator += load(cMem, *operand);
+	*accumulator += *operand; // Use the operand value directly
 	*pc += 2;
 	break;
     case 3: // STORE
-        store(dMem, *operand, *accumulator);
+        store(dMem, (*operand-1)*2, *accumulator);
         *pc += 2;
         break;
     case 4: // LOADM
-        *accumulator = *operand; // Use the operand value directly
-        *pc += 2;
+        *accumulator = load(dMem, (*operand-1)*2);
+	*pc += 2;
         break;
     case 5: // ADDM
-	*accumulator += *operand;
+	*accumulator += load(dMem, (*operand-1)*2);
 	*pc += 2;
 	break;
     case 6: // READ
     {
         // Read a value from the dMem
-        unsigned short input = load(dMem, *dataPointer);
-     printf("READ: operand: %d input: %d datapointer: %d \n", *operand, input, *dataPointer);
-     	dataPointer += 2; // Move to next data value 
-        store(dMem, *operand, input);
+        unsigned short input = inputs[*operand-1];
+     	
+     *dataPointer += 2; // Move to next data value 
+     store(dMem, (*operand-1)*2, input);
         *pc += 2;
         break;
     }
     case 7: // WRITE
     {
-        printf("Output: %hu\n", load(dMem, *operand));
+        printf("Output: %hu\n", *accumulator);
         *pc += 2;
         break;
     }
@@ -227,7 +226,7 @@ unsigned short load(unsigned short memory[], unsigned short address)
  * Parameters: unsigned short memory[] - The memory array to store instructions.
  * Returns: void
  */
-void loadInstructions(unsigned short memory[], unsigned short dMem[])
+void loadInstructions(unsigned short memory[], unsigned short inputs[])
 {
     unsigned short opCode, opn;
     unsigned short address = 0; // Initialize memory address to 0
@@ -315,8 +314,8 @@ void loadInstructions(unsigned short memory[], unsigned short dMem[])
             // Store the value if we read digits
             if (hasDigit && dataAddress < 64)
             {
-                store(dMem, dataAddress, value);
-                dataAddress += 2; // Each value takes  bytes
+                inputs[dataAddress]=value;
+		    dataAddress += 1; // Each value takes  bytes
             }
         }
     }
