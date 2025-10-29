@@ -44,7 +44,6 @@ int main()
 
     loadInstructions(cMem, inputs);
 
-dump(cMem, dMem, accumulator, pc, instructionRegister, opCode, opn);
 
     while (1)
     {
@@ -53,9 +52,6 @@ dump(cMem, dMem, accumulator, pc, instructionRegister, opCode, opn);
             break;
 
     }
-
-    printf("\n\nRegisters and Memory Dump:\n");
-    dump(cMem, dMem, accumulator, pc, instructionRegister, opCode, opn);
 
     return 0;
 }
@@ -321,56 +317,3 @@ void loadInstructions(unsigned short memory[], unsigned short inputs[])
     }
 }
 
-/**
- * Function: dump
- * Purpose: Print a memory dump showing registers and memory contents in hexadecimal format.
- *          CODE section shows memory , DATA section shows dMem.
- * Parameters:
- *   unsigned short memory[] - The memory array
- *   short accumulator - Current accumulator value
- *   unsigned short pc - Program counter value
- *   unsigned short instructionRegister - Instruction register value
- *   unsigned short opCode - Current opcode
- *   unsigned short operand - Current operand
- * Returns: void
- */
-void dump(unsigned short memory[], unsigned short dMem[], short accumulator, unsigned short pc,
-          unsigned short instructionRegister, unsigned short opCode, unsigned short operand)
-{
-    // Print registers
-    printf("\nREGISTERS:\n");
-    printf("accumulator                 0x%04X\n", (unsigned short) accumulator);
-    printf("instructionCounter          0x%04X\n", pc);
-    printf("instructionRegister         0x%04X\n", instructionRegister);
-    printf("opCode                      0x%X\n", opCode);
-    printf("operand                     0x%04X\n", operand);
-
-    // Print CODE section (first 100 bytes, addresses 0-99)
-    printf("\nCODE:\n");
-    printf("     0  1  2  3  4  5  6  7  8  9\n");
-    for (unsigned short address = 0; address < 100; address += 10)
-    {
-        printf("%04d ", address);
-        for (int i = 0; i < 10; i++)
-        {
-            if (address + i < 100) // Don't exceed byte 99
-                printf("%02X ", memory[address + i] & 0xFF);
-        }
-        printf("\n");
-    }
-
-    // Print DATA section (first 100 bytes, addresses 1024-1123)
-    printf("...\n\nDATA:\n");
-    printf("     0  1  2  3  4  5  6  7  8  9\n");
-    for (unsigned short address = 0; address < 64; address += 10)
-    {
-        printf("%04d ", address);
-        for (int i = 0; i < 10; i++)
-        {
-            if (address + i < 64) // Don't exceed address 1123
-                printf("%02X ", dMem[address + i] & 0xFF);
-        }
-        printf("\n");
-    }
-    printf("...\n");
-}
