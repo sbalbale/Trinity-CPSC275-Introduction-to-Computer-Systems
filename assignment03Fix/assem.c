@@ -135,25 +135,25 @@ void execute(unsigned short memory[], short *accumulator, unsigned short *pc, un
     // Decode the instruction to get opcode and operand
     unsigned short m = decode(*instructionRegister, opCode, operand);
 
-    // Increment pc to point to the next instruction (2 bytes per instruction)
-    *pc += 2;
-
     // Execute based on opcode
     switch (*opCode)
     {
     case 0: // EOC
+        *pc += 2;
         break;
     case 1: // LOAD
         if (m == 0) // direct addressing
             *accumulator = load(memory, *operand);
-        else // indirect addressing
-            *accumulator = load(memory, load(memory, *operand));
+        else // m == 1, immediate addressing
+            *accumulator = *operand; // Use the operand value directly
+        *pc += 2;
         break;
     case 2: // STORE
         if (m == 0) // direct addressing
             store(memory, *operand, *accumulator);
         else // indirect addressing
             store(memory, load(memory, *operand), *accumulator);
+        *pc += 2;
         break;
     case 3: // READ
     {
@@ -165,34 +165,39 @@ void execute(unsigned short memory[], short *accumulator, unsigned short *pc, un
             store(memory, *operand, input);
         else // indirect addressing
             store(memory, load(memory, *operand), input);
+        *pc += 2;
         break;
     }
     case 4: // WRITE
     {
         // Write (output) the value from memory
         if (m == 0) // direct addressing
-            printf("Output: %hu\n", load(memory, *operand));
+            printf("%hu\n", load(memory, *operand));
         else // indirect addressing
-            printf("Output: %hu\n", load(memory, load(memory, *operand)));
+            printf("%hu\n", load(memory, load(memory, *operand)));
+        *pc += 2;
         break;
     }
     case 5: // ADD
         if (m == 0) // direct addressing
             *accumulator += load(memory, *operand);
-        else // indirect addressing
-            *accumulator += load(memory, load(memory, *operand));
+        else // m == 1, immediate addressing
+            *accumulator += *operand; // Use the operand value directly
+        *pc += 2;
         break;
     case 6: // SUB
         if (m == 0) // direct addressing
             *accumulator -= load(memory, *operand);
-        else // indirect addressing
-            *accumulator -= load(memory, load(memory, *operand));
+        else // m == 1, immediate addressing
+            *accumulator -= *operand; // Use the operand value directly
+        *pc += 2;
         break;
     case 7: // MUL
         if (m == 0) // direct addressing
             *accumulator *= load(memory, *operand);
-        else // indirect addressing
-            *accumulator *= load(memory, load(memory, *operand));
+        else // m == 1, immediate addressing
+            *accumulator *= *operand; // Use the operand value directly
+        *pc += 2;
         break;
     case 8: // DIV
         if (m == 0) // direct addressing
@@ -203,14 +208,15 @@ void execute(unsigned short memory[], short *accumulator, unsigned short *pc, un
             else
                 printf("Error: Division by zero\n");
         }
-        else // indirect addressing
+        else // m == 1, immediate addressing
         {
-            unsigned short divisor = load(memory, load(memory, *operand));
+            unsigned short divisor = *operand; // Use the operand value directly
             if (divisor != 0)
                 *accumulator /= divisor;
             else
                 printf("Error: Division by zero\n");
         }
+        *pc += 2;
         break;
     case 9: // MOD
         if (m == 0) // direct addressing
@@ -221,35 +227,43 @@ void execute(unsigned short memory[], short *accumulator, unsigned short *pc, un
             else
                 printf("Error: Division by zero\n");
         }
-        else // indirect addressing
+        else // m == 1, immediate addressing
         {
-            unsigned short divisor = load(memory, load(memory, *operand));
+            unsigned short divisor = *operand; // Use the operand value directly
             if (divisor != 0)
                 *accumulator %= divisor;
             else
                 printf("Error: Division by zero\n");
         }
+        *pc += 2;
         break;
     case 10: // NEG
         *accumulator = -(*accumulator);
+        *pc += 2;
         break;
     case 11: // NOP
+        *pc += 2;
         break;
     case 12: // JUMP
         *pc = *operand;
         break;
     case 13: // JNEG
         if (*accumulator < 0)
-            *pc = *operand;
+            *pc = *operand; // Jump is taken
+        else
+            *pc += 2; // Jump is not taken, increment normally
         break;
     case 14: // JZERO
         if (*accumulator == 0)
-            *pc = *operand;
+            *pc = *operand; // Jump is taken
+        else
+            *pc += 2; // Jump is not taken, increment normally
         break;
     case 15: // HALT
         break;
     default:
         printf("Error: Unknown opcode %hu\n", *opCode);
+        *pc += 2;
         break;
     }
 }
