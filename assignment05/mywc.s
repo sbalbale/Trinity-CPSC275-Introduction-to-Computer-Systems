@@ -65,7 +65,7 @@ getline:
     call  scanf              # read a character
     addl  $8, %esp           # clean up stack
     cmpl  $1, %eax           # check if scanf succeeded (returns 1 on success)
-    jne   .done              # if scanf failed, we're done
+    jne   .done              # if scanf failed done
     movb  -8(%ebp), %al      # load the character into %al
     cmpb  $'\n', %al         # check if character is newline
     movb  %al, (%ebx)        # store character in buffer
@@ -96,7 +96,7 @@ countwords:
 .count_loop:
     movzbl (%ebx), %eax      # load character (zero-extend byte to dword)
     testb %al, %al           # check if null terminator
-    je    .count_done        # if null, we're done
+    je    .count_done        # if null done
     
     cmpb  $' ', %al          # check if space
     je    .is_space          # if space, handle it
@@ -137,7 +137,7 @@ countchars:
 .char_loop:
     movzbl (%ebx), %ecx      # load character (zero-extend byte to dword)
     testb %cl, %cl           # check if null terminator
-    je    .char_done         # if null, we're done
+    je    .char_done         # if null count_done
     
     incl  %eax               # increment character count
     incl  %ebx               # move to next character

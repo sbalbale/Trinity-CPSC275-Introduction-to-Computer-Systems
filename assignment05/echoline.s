@@ -51,7 +51,7 @@ getline:
     call  scanf              # read a character
     addl  $8, %esp           # clean up stack
     cmpl  $1, %eax           # check if scanf succeeded (returns 1 on success)
-    jne   .done              # if scanf failed, we're done
+    jne   .done              # if scanf failed done
     movb  -8(%ebp), %al      # load the character into %al
     cmpb  $'\n', %al         # check if character is newline
     movb  %al, (%ebx)        # store character in buffer
