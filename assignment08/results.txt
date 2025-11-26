@@ -1,0 +1,24 @@
+Performance Test Results
+------------------------
+Date: Wed Nov 26 13:27:57 EST 2025
+
+Buffer Size: 1MB (1048576 bytes)
+  copy1 (System Calls): Total execution time: 1152.836 milliseconds
+  copy2 (Standard I/O): Total execution time: 1192.222 milliseconds
+
+Buffer Size: 64KB (65536 bytes)
+  copy1 (System Calls): Total execution time: 1642.855 milliseconds
+  copy2 (Standard I/O): Total execution time: 1669.095 milliseconds
+
+Buffer Size: 4KB (4096 bytes)
+  copy1 (System Calls): Total execution time: 8497.533 milliseconds
+  copy2 (Standard I/O): Total execution time: 8377.668 milliseconds
+
+Buffer Size: 64B (64 bytes)
+  copy1 (System Calls): Total execution time: 524773.612 milliseconds
+  copy2 (Standard I/O): Total execution time: 7668.923 milliseconds
+
+Buffer Size: 1B (1 bytes)
+  copy1 (System Calls): 
+  copy2 (Standard I/O): Total execution time: 9350.900 milliseconds
+

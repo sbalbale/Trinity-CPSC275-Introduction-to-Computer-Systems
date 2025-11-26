@@ -1,0 +1,56 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{geometry}
+\geometry{letterpaper, margin=1in}
+\usepackage{times}
+
+\title{Performance Analysis: System Calls vs. Standard I/O}
+\author{Sean Balbale}
+\date{November 26, 2025}
+
+\begin{document}
+
+\maketitle
+
+\section*{Analysis of Empirical Results}
+
+\begin{enumerate}
+    \item[\textbf{A.}] \textbf{For the smallest buffer size (e.g., 1 byte), which version is faster, and why?}
+
+    In my testing, \texttt{copy2} (Standard I/O) is exponentially faster than \texttt{copy1} (System Calls) at the smallest buffer sizes. At 64 bytes, \texttt{copy1} took over 524,000 milliseconds (nearly 9 minutes), whereas \texttt{copy2} finished in roughly 7.6 seconds. At 1 byte, \texttt{copy1} failed to complete within a reasonable timeframe, while \texttt{copy2} finished in 9.3 seconds.
+
+    The reason for this discrepancy is the cost of context switching. \texttt{copy1} forces a system call (\texttt{read} and \texttt{write}) for every single byte processed. This requires the CPU to switch from user space to kernel space and back millions of times, creating massive overhead. \texttt{copy2}, however, utilizes the internal buffering provided by the \texttt{stdio} library. Even though I requested 1 byte, \texttt{fread} likely fetched a larger chunk (e.g., 4KB) into its internal buffer, allowing subsequent calls to be satisfied from memory without triggering a context switch for every byte.
+
+    \item[\textbf{B.}] \textbf{How does performance change as the buffer size increases for both programs? At what buffer size do the performance gains start to diminish?}
+
+    As the buffer size increases, the performance of \texttt{copy1} improves dramatically because the ratio of data payload to system call overhead becomes much more favorable. \texttt{copy2} shows much less variance because its internal buffering masks the inefficiency of small user buffers.
+
+    However, the gains begin to diminish significantly once the buffer size hits the 4KB to 64KB range.
+    \begin{itemize}
+        \item \textbf{4KB:} \texttt{copy1} (8497ms) vs. \texttt{copy2} (8377ms) — The gap closes.
+        \item \textbf{64KB:} \texttt{copy1} (1642ms) vs. \texttt{copy2} (1669ms) — Both see a major jump in speed compared to 4KB.
+        \item \textbf{1MB:} \texttt{copy1} (1152ms) vs. \texttt{copy2} (1192ms) — The improvement from 64KB to 1MB is present, but much smaller than the jump from 4KB to 64KB.
+    \end{itemize}
+
+    It seems that once the buffer is large enough to minimize the frequency of system calls (around 64KB), increasing it further yields diminishing returns as the bottleneck shifts from CPU overhead to actual disk I/O speed.
+
+    \item[\textbf{C.}] \textbf{Does standard I/O always outperform system calls? Why or why not?}
+
+    No, Standard I/O does not always outperform system calls. My results show that at the largest buffer size tested (1MB), \texttt{copy1} (1152ms) was actually slightly faster than \texttt{copy2} (1192ms).
+
+    This happens because Standard I/O introduces an extra layer of data copying. \texttt{fread} copies data from the kernel to its internal buffer, and then copies it again to the user's buffer. When using raw system calls with a sufficiently large buffer (like 1MB), \texttt{copy1} reads data directly from the kernel into the user buffer, skipping that intermediate copy. When the buffer is large enough that system call overhead is negligible, that extra memory copy in \texttt{copy2} becomes a slight liability.
+
+    \item[\textbf{D.}] \textbf{What role does the user-space buffering provided by \texttt{fread}/\texttt{fwrite} play in the performance compared to repeated \texttt{read}/\texttt{write} system calls?}
+
+    The user-space buffering in \texttt{fread}/\texttt{fwrite} acts as an optimization layer that aggregates many small I/O requests into fewer, larger system calls. It essentially decouples the logical read size (what my code asks for) from the physical read size (what the OS handles).
+
+    In the case of the 64-byte test, \texttt{copy1} had to interact with the kernel thousands of times more than \texttt{copy2}. The user-space buffer allows \texttt{copy2} to stay in user mode for most operations, only trapping into the kernel when the internal buffer runs dry. This explains why \texttt{copy2} remained relatively performant even when I set the explicit buffer size to 1 byte.
+
+    \item[\textbf{E.}] \textbf{Suppose you were writing a high-performance file copying tool. In what situations might you choose pure system calls versus standard I/O?}
+
+    If I were building a high-performance tool where I had complete control over the buffer size, I would choose pure system calls (\texttt{read}/\texttt{write}). As seen in the 1MB test, bypassing the standard library's internal buffering offers a slight performance edge by eliminating redundant memory copies, provided I can allocate a large enough buffer (e.g., 64KB or larger).
+
+    However, I would choose Standard I/O (\texttt{fread}/\texttt{fwrite}) if the application needed to handle unpredictable or very small read/write sizes, or if portability across different operating systems was a priority. Standard I/O is safer because it guarantees decent performance regardless of how the user code chunks the data, whereas system calls require the programmer to manually optimize the buffer size to avoid the massive performance penalties seen in my 64-byte test.
+\end{enumerate}
+
+\end{document}
