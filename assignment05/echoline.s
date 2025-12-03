@@ -6,11 +6,11 @@
 
 
 .LC0:
-    .string "%c"
+    .string "%c"            # format string for reading a single character
     .text
 
 .LC1:
-    .string "%s\n"
+    .string "%s\n"          # format string for printing the echoed line
     .text
 
 .globl main
@@ -62,7 +62,7 @@ getline:
 .done:
     movb  $0, (%ebx)         # null-terminate the string
     popl  %ebx               # restore %ebx
-    leave
-    ret
+    leave                    # restore previous frame pointer
+    ret                      # return from function
 
 

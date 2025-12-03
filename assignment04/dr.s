@@ -5,11 +5,11 @@
 # Date: 10/24/2025
 #
 .LC0:
-    .string "Enter a positive number: "
+    .string "Enter a positive number: "                 # prompt string
 .LC1:
-    .string "%d"
+    .string "%d"                                        # format string for reading integer
 .LC2:
-    .string "\nThe digital root of %d is: %d\n"
+    .string "\nThe digital root of %d is: %d\n"         # format string for printing result
 
 .globl main 
 main:

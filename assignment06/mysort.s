@@ -41,5 +41,5 @@ insertion_sort:
     jle .outer_loop          # repeat outer loop
 .done:
     popl %ebx               # restore callee-saved registers
-    leave
+    leave                   # restore previous frame pointer
     ret                     # return from function
