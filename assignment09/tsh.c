@@ -1,3 +1,12 @@
+/**
+* File: tsh.c
+* Purpose: A simple shell program that reads user input, parses commands,
+*          executes them, and handles built-in commands like "quit".
+* Author: Sean Balbale
+* Date: 12/8/2025
+**/
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,9 +17,18 @@
 #define MAX_LINE 1024
 #define MAX_ARGS 128
 
+
+
+/**
+ * Function: main
+ * Description: A simple shell program that reads user input, parses commands,
+ *             executes them, and handles built-in commands like "quit".
+ * Returns: 0 on successful execution.
+ * 
+ */
 int main() {
     char cmd_line[MAX_LINE];
-    char *argv[MAX_ARGS];
+    char *args[MAX_ARGS];
     char *token;
     pid_t pid;
     int status;
@@ -33,21 +51,21 @@ int main() {
         }
 
         // Parse command line into tokens
-        int argc = 0;                                       // Argument count
-        token = strtok(cmd_line, " ");                      // Split by spaces
-        while (token != NULL && argc < MAX_ARGS - 1) {      // Leave space for NULL terminator
-            argv[argc++] = token;                           // Store token in argv array
-            token = strtok(NULL, " ");                      // Get next token    
+        int nargs = 0;                                      // Argument count
+        token = strtok(cmd_line, " \t\n");                  // Split by whitespace
+        while (token != NULL && nargs < MAX_ARGS - 1) {     // Leave space for NULL terminator
+            args[nargs++] = token;                          // Store token in args array
+            token = strtok(NULL, " \t\n");                  // Get next token    
         }
-        argv[argc] = NULL; // Null-terminate the argument list
+        args[nargs] = NULL; // Null-terminate the argument list
 
         // If no command entered, continue
-        if (argc == 0) {
+        if (nargs == 0) {
             continue;
         }
 
         // Check for built-in command "quit"
-        if (strcmp(argv[0], "quit") == 0) {
+        if (strcmp(args[0], "quit") == 0) {
             exit(0);
         }
 
@@ -60,9 +78,9 @@ int main() {
             continue;
         } else if (pid == 0) {
             // Child process
-            if (execvp(argv[0], argv) < 0) { // Execute the command (argv[0]) with arguments (argv)
+            if (execvp(args[0], args) < 0) { // Execute the command (args[0]) with arguments (args)
                 // execvp only returns if it fails
-                perror(argv[0]); // Print error message like "ls: No such file or directory"
+                perror(args[0]); // Print error message like "ls: No such file or directory"
                 exit(1);
             }
         } else {
